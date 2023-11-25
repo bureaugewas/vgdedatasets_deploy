@@ -17,9 +17,20 @@ AZURE_TENANT_ID="$7"
 # Install docker-credential-secretservice if not already installed
 if ! command -v docker-credential-secretservice &> /dev/null; then
   echo "Installing docker-credential-secretservice..."
-  sudo apt-get update
-  sudo apt-get install -y docker-credential-secretservice
+
+  # Download the binary
+  curl -fsSL https://github.com/docker/docker-credential-helpers/releases/download/v0.7.0/docker-credential-secretservice-v0.7.0-amd64.tar.gz -o /tmp/docker-credential-secretservice.tar.gz
+
+  # Extract the binary
+  tar -xvf /tmp/docker-credential-secretservice.tar.gz -C /tmp/
+
+  # Move the binary to a directory in your PATH
+  sudo mv /tmp/docker-credential-secretservice /usr/local/bin/
+
+  # Clean up
+  rm /tmp/docker-credential-secretservice.tar.gz
 fi
+
 
 # Clone the GitHub repository
 echo "Cloning repository: bureaugewas/vgde_datasets_pipeline"
