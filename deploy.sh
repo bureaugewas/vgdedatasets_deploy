@@ -14,12 +14,25 @@ AZURE_CLIENT_ID="$5"
 AZURE_CLIENT_SECRET="$6"
 AZURE_TENANT_ID="$7"
 
+# Remove the existing directory
+echo "Removing existing directory: vgdedatasets_deploy"
+rm -rf vgdedatasets_deploy
+
 # Clone the GitHub repository
 echo "Cloning repository: bureaugewas/vgde_datasets_pipeline"
-git clone https://$GITHUB_TOKEN@github.com/bureaugewas/vgde_datasets_pipeline /tmp/vgde_datasets_pipeline
+git clone https://$GITHUB_TOKEN@github.com/bureaugewas/vgde_datasets_pipeline vgdedatasets_deploy
 
 # Step into the cloned repository
-cd /tmp/vgde_datasets_pipeline || exit 1
+cd vgdedatasets_deploy || exit 1
+
+# Stop and remove the existing Docker container
+echo "Stopping and removing existing Docker container: $PIPELINE_NAME"
+docker stop "$PIPELINE_NAME" || true
+docker rm "$PIPELINE_NAME" || true
+
+# Remove the existing Docker image
+echo "Removing existing Docker image: bureaugewas/vgdedatasets"
+docker rmi bureaugewas/vgdedatasets:latest || true
 
 # Step 1: Build Docker image
 echo "Step 1: Building Docker image"
@@ -47,8 +60,5 @@ echo "Step 4: Setting up cron job"
 (crontab -l 2>/dev/null; echo "00 02 * * * PIPELINE_NAME=$PIPELINE_NAME && \
 docker rm \$PIPELINE_NAME && \
 docker start \$PIPELINE_NAME >> /var/log/myjob.log 2>&1") | crontab -
-
-# Clean up: Remove the cloned repository
-rm -rf /tmp/vgde_datasets_pipeline
 
 echo "Deployment script completed for pipeline: $PIPELINE_NAME."
