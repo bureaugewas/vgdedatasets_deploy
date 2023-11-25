@@ -14,6 +14,13 @@ AZURE_CLIENT_ID="$5"
 AZURE_CLIENT_SECRET="$6"
 AZURE_TENANT_ID="$7"
 
+# Install docker-credential-secretservice if not already installed
+if ! command -v docker-credential-secretservice &> /dev/null; then
+  echo "Installing docker-credential-secretservice..."
+  sudo apt-get update
+  sudo apt-get install -y docker-credential-secretservice
+fi
+
 # Clone the GitHub repository
 echo "Cloning repository: bureaugewas/vgde_datasets_pipeline"
 git clone https://$GITHUB_TOKEN@github.com/bureaugewas/vgde_datasets_pipeline vgdedatasets_deploy
@@ -32,6 +39,8 @@ docker rmi bureaugewas/vgdedatasets:latest || true
 
 # Step 1: Build Docker image
 echo "Step 1: Building Docker image"
+mkdir -p ~/.docker
+echo '{"credsStore": "secretservice"}' > ~/.docker/config.json
 echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t vgdedatasets .
 
