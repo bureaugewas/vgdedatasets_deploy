@@ -23,6 +23,8 @@ cd /tmp/vgde_datasets_pipeline || exit 1
 
 # Step 1: Build Docker image
 echo "Step 1: Building Docker image"
+mkdir -p ~/.docker
+echo '{"credsStore": "secretservice"}' > ~/.docker/config.json
 echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t vgdedatasets .
 
@@ -31,25 +33,20 @@ echo "Step 2: Pushing Docker image to Docker Hub"
 docker tag vgdedatasets bureaugewas/vgdedatasets:latest
 docker push bureaugewas/vgdedatasets:latest
 
-# Step 3: Test run the Docker image on Raspberry Pi
-echo "Step 3: Testing Docker image on Raspberry Pi"
-docker run --name "$PIPELINE_NAME" \
-           -e PIPELINE="$PIPELINE_NAME" \
-           -e AZURE_CLIENT_ID="$AZURE_CLIENT_ID" \
-           -e AZURE_CLIENT_SECRET="$AZURE_CLIENT_SECRET" \
-           -e AZURE_TENANT_ID="$AZURE_TENANT_ID" \
-           bureaugewas/vgdedatasets:latest
+# Step 3: Create Docker container on Raspberry Pi
+echo "Step 3: Creating Docker container on Raspberry Pi"
+docker create --name "$PIPELINE_NAME" \
+              -e PIPELINE="$PIPELINE_NAME" \
+              -e AZURE_CLIENT_ID="$AZURE_CLIENT_ID" \
+              -e AZURE_CLIENT_SECRET="$AZURE_CLIENT_SECRET" \
+              -e AZURE_TENANT_ID="$AZURE_TENANT_ID" \
+              bureaugewas/vgdedatasets:latest
 
 # Step 4: Set up cron job on Raspberry Pi
 echo "Step 4: Setting up cron job"
 (crontab -l 2>/dev/null; echo "00 02 * * * PIPELINE_NAME=$PIPELINE_NAME && \
 docker rm \$PIPELINE_NAME && \
-docker run --name \$PIPELINE_NAME \
-           -e PIPELINE=\$PIPELINE_NAME \
-           -e AZURE_CLIENT_ID=\"$AZURE_CLIENT_ID\" \
-           -e AZURE_CLIENT_SECRET=\"$AZURE_CLIENT_SECRET\" \
-           -e AZURE_TENANT_ID=\"$AZURE_TENANT_ID\" \
-           bureaugewas/vgdedatasets:latest >> /var/log/myjob.log 2>&1") | crontab -
+docker start \$PIPELINE_NAME >> /var/log/myjob.log 2>&1") | crontab -
 
 # Clean up: Remove the cloned repository
 rm -rf /tmp/vgde_datasets_pipeline
