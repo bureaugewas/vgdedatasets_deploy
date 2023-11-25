@@ -32,8 +32,6 @@ docker rmi bureaugewas/vgdedatasets:latest || true
 
 # Step 1: Build Docker image
 echo "Step 1: Building Docker image"
-mkdir -p ~/.docker
-echo '{"credsStore": "secretservice"}' > ~/.docker/config.json
 echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t vgdedatasets .
 
