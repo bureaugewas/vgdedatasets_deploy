@@ -57,6 +57,7 @@ docker start \$PIPELINE_NAME >> /var/log/myjob.log 2>&1") | crontab -
 
 # Clean up: Remove the cloned repository
 echo "Cleaning up: Removing cloned repository"
-rm -rf ../vgdedatasets_deploy
+cd ..
+rm -rf vgdedatasets_deploy
 
 echo "Deployment script completed for pipeline: $PIPELINE_NAME."
