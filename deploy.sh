@@ -18,17 +18,14 @@ AZURE_TENANT_ID="$7"
 if ! command -v docker-credential-secretservice &> /dev/null; then
   echo "Installing docker-credential-secretservice..."
 
-  # Download the binary
-  curl -fsSL https://github.com/docker/docker-credential-helpers/releases/download/v0.7.0/docker-credential-secretservice-v0.7.0-amd64.tar.gz -o /tmp/docker-credential-secretservice.tar.gz
-
-  # Extract the binary
-  tar -xvf /tmp/docker-credential-secretservice.tar.gz -C /tmp/
+  # Download the latest release from Docker GitHub repository
+  curl -fsSL https://github.com/docker/docker-credential-helpers/releases/latest/download/docker-credential-secretservice-amd64 -o /tmp/docker-credential-secretservice
 
   # Move the binary to a directory in your PATH
   sudo mv /tmp/docker-credential-secretservice /usr/local/bin/
 
-  # Clean up
-  rm /tmp/docker-credential-secretservice.tar.gz
+  # Set executable permissions
+  sudo chmod +x /usr/local/bin/docker-credential-secretservice
 fi
 
 
