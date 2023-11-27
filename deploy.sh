@@ -2,7 +2,7 @@
 
 # Check if all required arguments are provided
 if [ "$#" -ne 7 ]; then
-  echo "Usage: $0 <pipeline_name> <github_token> <docker_username> <docker_password>"
+  echo "Usage: $0 <pipeline_name> <github_token> <docker_username> <docker_password> <azure_client_id> <azure_client_secret> <azure_tenant_id>"
   exit 1
 fi
 
@@ -10,6 +10,9 @@ PIPELINE_NAME="$1"
 GITHUB_TOKEN="$2"
 DOCKER_USERNAME="$3"
 DOCKER_PASSWORD="$4"
+AZURE_CLIENT_ID="$5"
+AZURE_CLIENT_SECRET="$6"
+AZURE_TENANT_ID="$7"
 
 # Clone the GitHub repository
 echo "Cloning repository: bureaugewas/vgde_datasets_pipeline"
@@ -31,7 +34,7 @@ docker rmi bureaugewas/vgdedatasets:latest || true
 echo "Step 1: Building Docker image"
 export DOCKER_CONFIG=$HOME/.docker
 mkdir -p $DOCKER_CONFIG
-echo "$DOCKER_PASSWORD" | sudo docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
+echo "$DOCKER_PASSWORD" | sudo docker login --username "$DOCKER_USERNAME" --password-stdin
 docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t vgdedatasets .
 
 # Step 2: Push Docker image to Docker Hub
