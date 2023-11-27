@@ -31,7 +31,7 @@ docker rmi bureaugewas/vgdedatasets:latest || true
 echo "Step 1: Building Docker image"
 export DOCKER_CONFIG=$HOME/.docker
 mkdir -p $DOCKER_CONFIG
-echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+#echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
 docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t vgdedatasets .
 
 # Step 2: Push Docker image to Docker Hub
