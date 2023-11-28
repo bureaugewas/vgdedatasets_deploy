@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Check if all required arguments are provided
-if [ "$#" -ne 8 ]; then
-  echo "Usage: $0 <pipeline_name> <host> <password> <github_token> <docker_username> <docker_password>"
+if [ "$#" -ne 6 ]; then
+  echo "Usage: $0 <pipeline_name>  <host> <password> <github_token> <docker_username> <docker_password>"
   exit 1
 fi
 
@@ -30,18 +30,19 @@ docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t vgdedatasets .
 
 # Step 2: Push Docker image to Docker Hub
 echo "Step 2: Pushing Docker image to Docker Hub"
-docker login --username "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
+echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 docker tag vgdedatasets bureaugewas/vgdedatasets:latest
 docker push bureaugewas/vgdedatasets:latest
 
 # Step 3: Connect to Raspberry Pi via SSH and create Docker container
 echo "Step 3: Creating Docker container on Raspberry Pi"
-sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no $HOST "docker pull bureaugewas/vgdedatasets:latest && \
-                        docker stop $PIPELINE_NAME || true && \
-                        docker rm $PIPELINE_NAME || true && \
-                        docker create --name $PIPELINE_NAME \
-                                      -e PIPELINE=$PIPELINE_NAME \
-                                      bureaugewas/vgdedatasets:latest"
+ssh -o StrictHostKeyChecking=no -i /Users/jurjenwerkaccount/.ssh/id_rsa  "$HOST" \
+"echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+ docker stop $PIPELINE_NAME || true && \
+ docker rm $PIPELINE_NAME || true && \
+ docker rmi bureaugewas/vgdedatasets:latest && \
+ docker pull bureaugewas/vgdedatasets:latest && \
+ docker create --name $PIPELINE_NAME -e PIPELINE=$PIPELINE_NAME bureaugewas/vgdedatasets:latest"
 
 # Clean up: Remove the cloned repository
 echo "Cleaning up: Removing cloned repository"
