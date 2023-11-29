@@ -40,9 +40,8 @@ ssh -o StrictHostKeyChecking=no -i /Users/jurjenwerkaccount/.ssh/id_rsa  "$HOST"
 "echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
  docker stop $PIPELINE_NAME || true && \
  docker rm $PIPELINE_NAME || true && \
- docker rmi bureaugewas/vgdedatasets:latest && \
  docker pull bureaugewas/vgdedatasets:latest && \
- docker create --name $PIPELINE_NAME -e PIPELINE=$PIPELINE_NAME bureaugewas/vgdedatasets:latest"
+ docker create --name $PIPELINE_NAME -e PIPELINE=$PIPELINE_NAME  -e AZURE_CLIENT_ID=$AZURE_CLIENT_ID -e AZURE_CLIENT_SECRET=$AZURE_CLIENT_SECRET -e AZURE_TENANT_ID=$AZURE_TENANT_ID bureaugewas/vgdedatasets:latest"
 
 # Clean up: Remove the cloned repository
 echo "Cleaning up: Removing cloned repository"
